@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pirate's Adventure</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #333;
+        }
+        #game-box {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #000;
+            background-color: rgba(0, 0, 0, 0.8);
+            text-align: left;
+            font-size: 18px;
+            line-height: 1.5;
+            border-radius: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            background-color: #8B0000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #B22222;
+        }
+        #inventory {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+        }
+        #health-bar {
+            width: 100%;
+            background-color: #ddd;
+            border: 1px solid #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .health {
+            height: 20px;
+            background-color: #00FF00;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pirate's Adventure</h1>
+    <button id="start-button">Play</button>
+    <div id="game-box" style="display: none;"></div>
+    <div id="inventory" style="display: none;">
+        <p><b>Inventory:</b></p>
+        <p id="inventory-doubloons">Doubloons: 0</p>
+        <p id="inventory-wood">Wood: 0</p>
+        <p id="inventory-rope">Rope: 0</p>
+    </div>
+    <script>
+        const startButton = document.getElementById("start-button");
+        const gameBox = document.getElementById("game-box");
+        const inventoryBox = document.getElementById("inventory");
+        const inventoryDoubloons = document.getElementById("inventory-doubloons");
+        const inventoryWood = document.getElementById("inventory-wood");
+        const inventoryRope = document.getElementById("inventory-rope");
+
+        let playerHealth = 100;
+        let playerDoubloons = 0;
+        let woodCollected = 0;
+        let ropeCollected = 0;
+        let monsterHealth = 50;
+
+        function startGame() {
+            startButton.style.display = "none";
+            gameBox.style.display = "block";
+            inventoryBox.style.display = "block";
+            gameBox.innerHTML = `
+                <p>Nooooo! Your ship crashed into an island!</p>
+                <p>You find a map that shows it's the island where treasure is buried. You move towards the treasure.</p>
+                <p>Suddenly, you face a riddle to open the door.</p>
+                <p><b>Riddle:</b> I am always running but never move. What am I?</p>
+                <p>Type your answer below:</p>
+                <input type="text" id="riddle-answer" placeholder="Enter your answer">
+                <button onclick="checkRiddle()">Submit</button>
+            `;
+        }
+
+        function checkRiddle() {
+            const answer = document.getElementById("riddle-answer").value.toLowerCase();
+            if (answer === "time") {
+                gameBox.innerHTML = `<p>The door opens, and a monster attacks you!</p>`;
+                startMonsterFight();
+            } else {
+                gameBox.innerHTML = `<p>opps!  dont worry pirate Try again.</p>`;
+            }
+        }
+
+        function startMonsterFight() {
+            gameBox.innerHTML = `
+                <p>A monster stands before you, guarding the treasure!</p>
+                <div id="health-bar">
+                    <div class="health" id="player-health" style="width: ${playerHealth}%;"></div>
+                </div>
+                <p>Your Health: ${playerHealth}</p>
+                <p>Monster's Health: ${monsterHealth}</p>
+                <button onclick="attackMonster()">Attack</button>
+                <button onclick="healPlayer()">Heal</button>
+            `;
+        }
+
+        function attackMonster() {
+            const damage = Math.floor(Math.random() * 20) + 10;
+            monsterHealth -= damage;
+            if (monsterHealth <= 0) {
+                monsterHealth = 0;
+                playerDoubloons += 100;
+                inventoryDoubloons.textContent = `Doubloons: ${playerDoubloons}`;
+                gameBox.innerHTML = `<p>You defeated the monster and here is the treasure of shiny 100 doubloons!</p><button onclick="collectResources()">Continue</button>`;
+            } else {
+                monsterAttacks();
+            }
+            updateHealth();
+        }
+
+        function healPlayer() {
+            const heal = Math.floor(Math.random() * 20) + 10;
+            playerHealth += heal;
+            if (playerHealth > 100) playerHealth = 100;
+            monsterAttacks();
+            updateHealth();
+        }
+
+        function monsterAttacks() {
+            const damage = Math.floor(Math.random() * 15) + 5;
+            playerHealth -= damage;
+            if (playerHealth <= 0) {
+                playerHealth = 0;
+                gameBox.innerHTML = `<p>The monster got the god pirate. Game over but dont give up!</p>`;
+            }
+            updateHealth();
+        }
+
+        function updateHealth() {
+            document.getElementById("player-health").style.width = `${playerHealth}%`;
+        }
+
+        function collectResources() {
+            gameBox.innerHTML = `
+                <p>You need to craft an axe to save a girl trapped by the tribes the live the other side of the island</p>
+                <p>Collect 4 wood and 2 rope to make the axe.</p>
+                <button onclick="collectWood()">Collect Wood</button>
+                <button onclick="collectRope()">Collect Rope</button>
+            `;
+        }
+
+        function collectWood() {
+            woodCollected++;
+            inventoryWood.textContent = `Wood: ${woodCollected}`;
+            checkResources();
+        }
+
+        function collectRope() {
+            ropeCollected++;
+            inventoryRope.textContent = `Rope: ${ropeCollected}`;
+            checkResources();
+        }
+
+        function checkResources() {
+            if (woodCollected >= 4 && ropeCollected >= 2) {
+                gameBox.innerHTML = `<p>You crafted an axe! Now, go save the girl in the name of pirate she is in trouble .</p><button onclick="fightTribes()">Fight Tribes</button>`;
+            }
+        }
+
+        function fightTribes() {
+            gameBox.innerHTML = `
+                <p>You face the tribes guarding the girl!</p>
+                <div id="health-bar">
+                    <div class="health" id="player-health" style="width: ${playerHealth}%"></div>
+                </div>
+                <p>Your Health: ${playerHealth}</p>
+                <button onclick="attackTribes()">Attack</button>
+                <button onclick="healPlayer()">Heal</button>
+            `;
+        }
+
+        function attackTribes() {
+            const damage = Math.floor(Math.random() * 25) + 10;
+            playerDoubloons += 50;
+            inventoryDoubloons.textContent = `Doubloons: ${playerDoubloons}`;
+            gameBox.innerHTML = `<p>You defeated the tribes and saved the girl! She thanks you and you kisses you a rescue boat appears to take you away. Now she is yours !</p>`;
+        }
+
+        startButton.addEventListener("click", startGame);
+    </script>
+</body>
+</html>
