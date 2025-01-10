@@ -1,4 +1,4 @@
-import random
+"""import random
 import os
 import time
 from playsound import playsound
@@ -99,4 +99,4 @@ def play_game():
         print("\nSome times you need to choose you path wisely this is life not a game Life over!")
         play_sound("trap")
 
-play_game()
+play_game()"""
